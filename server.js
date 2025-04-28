@@ -29,8 +29,6 @@ app.use(cookieParser());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
 })
 .then(() => console.log('Connected to MongoDB atlas'))
 .catch((err) => console.error('Could not connect to MongoDB', err));
@@ -42,13 +40,13 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientRoutes);
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
-  });
-}
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+//   });
+// }
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
