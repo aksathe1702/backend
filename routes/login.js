@@ -11,13 +11,19 @@ dotenv.config();
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-  console.log("i am in login")
+  console.log("➡️ Login API called");
+
   const { email, password, role } = req.body;
 
-  console.log('Received data:', req.body);
+  console.log('➡️ Received data:', { email, role }); // Don't log passwords
 
   try {
+    if (!email || !password || !role) {
+      return res.status(400).json({ error: 'Email, password, and role are required' });
+    }
+
     let user;
+
     if (role === 'doctor') {
       user = await Doctor.findOne({ email });
     } else if (role === 'admin') {
@@ -25,23 +31,42 @@ router.post('/', async (req, res) => {
     } else {
       user = await User.findOne({ email, role });
     }
-    
+
     if (!user) {
-      return res.status(400).send({ error: 'Invalid email or role' });
+      console.log('❌ No user found with this email and role');
+      return res.status(400).json({ error: 'Invalid email or role' });
+    }
+
+    if (!user.password) {
+      console.log('❌ User record has no password');
+      return res.status(400).json({ error: 'Invalid user data' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return res.status(400).send({ error: 'Invalid password' });
+      console.log('❌ Password does not match');
+      return res.status(400).json({ error: 'Invalid password' });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
 
-    res.send({ token, role: user.role });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    console.log('✅ Token created successfully');
+
+    return res.status(200).json({ token, role: user.role });
 
   } catch (error) {
-    console.log("login api error",error)
-    res.status(500).send({ error: 'Server error' });
+    console.error("🔥 Login API Error:", error.message, error.stack);
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 
