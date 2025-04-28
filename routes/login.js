@@ -40,6 +40,7 @@ router.post('/', async (req, res) => {
     res.send({ token, role: user.role });
 
   } catch (error) {
+    console.log("login api error",error)
     res.status(500).send({ error: 'Server error' });
   }
 });
