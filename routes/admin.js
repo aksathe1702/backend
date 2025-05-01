@@ -61,51 +61,12 @@ router.post('/login', async (req, res) => {
 });
 
 // Admin add doctor
-// router.post('/add-doctor', auth, async (req, res) => {
-//   if (req.user.role !== 'admin') {
-//     return res.status(403).send({ error: 'Not authorized to add doctors' });
-//   }
-
-//   const { firstName, lastName, email, specialty, licenseNumber, phoneNumber, password } = req.body;
-
-//   try {
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const doctor = new Doctor({
-//       firstName,
-//       lastName,
-//       email,
-//       specialty,
-//       licenseNumber,
-//       phoneNumber,
-//       password: hashedPassword,
-//     });
-
-//     await doctor.save();
-//     res.status(201).send({ message: 'Doctor added successfully' });
-//   } catch (error) {
-//     if (error.code === 11000) {
-//       return res.status(400).send({ error: 'Email or license number already exists' });
-//     }
-//     res.status(400).send({ error: error.message });
-//   }
-// });
-
-
-// Admin add doctor
 router.post('/add-doctor', auth, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).send({ error: 'Not authorized to add doctors' });
   }
 
   const { firstName, lastName, email, specialty, licenseNumber, phoneNumber, password } = req.body;
-
-  // Log request body to debug issues
-  console.log("Received doctor data:", req.body);
-
-  if (!firstName || !lastName || !email || !specialty || !licenseNumber || !phoneNumber || !password) {
-    return res.status(400).send({ error: 'All fields are required.' });
-  }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -123,14 +84,12 @@ router.post('/add-doctor', auth, async (req, res) => {
     await doctor.save();
     res.status(201).send({ message: 'Doctor added successfully' });
   } catch (error) {
-    console.error("Error saving doctor:", error);
     if (error.code === 11000) {
       return res.status(400).send({ error: 'Email or license number already exists' });
     }
     res.status(400).send({ error: error.message });
   }
 });
-
 
 // Admin add another admin
 router.post('/add-admin', auth, async (req, res) => {
