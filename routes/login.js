@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 
   const { email, password, role } = req.body;
 
-  console.log('➡️ Received data:', { email, role }); // Don't log passwords
+  console.log('➡️ Received data:', { email, role });
 
   try {
     if (!email || !password || !role) {
@@ -42,6 +42,9 @@ router.post('/', async (req, res) => {
       console.log('❌ User record has no password');
       return res.status(400).json({ error: 'Invalid user data' });
     }
+
+    // Log the hashed password to verify it
+    console.log('➡️ User password hash in DB:', user.password);
 
     const isMatch = await bcrypt.compare(password, user.password);
 
