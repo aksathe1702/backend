@@ -19,16 +19,22 @@ router.post('/', async (req, res) => {
 
   try {
     if (!email || !password || !role) {
+      console.log('❌ Missing required fields');
       return res.status(400).json({ error: 'Email, password, and role are required' });
     }
+
+    console.log('🔍 Checking user in the database...');
 
     let user;
 
     if (role === 'doctor') {
+      console.log('🔍 Searching for doctor...');
       user = await Doctor.findOne({ email });
     } else if (role === 'admin') {
+      console.log('🔍 Searching for admin...');
       user = await Admin.findOne({ email });
     } else {
+      console.log('🔍 Searching for patient...');
       user = await User.findOne({ email, role });
     }
 
@@ -36,6 +42,8 @@ router.post('/', async (req, res) => {
       console.log('❌ No user found with this email and role');
       return res.status(400).json({ error: 'Invalid email or role' });
     }
+
+    console.log('🔑 Verifying password...');
 
     if (!user.password) {
       console.log('❌ User record has no password');
@@ -54,6 +62,8 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Server configuration error' });
     }
 
+    console.log('✅ Password verified successfully');
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -61,6 +71,7 @@ router.post('/', async (req, res) => {
     );
 
     console.log('✅ Token created successfully');
+    console.log('➡️ User login successful. Returning token.');
 
     return res.status(200).json({ token, role: user.role });
 
